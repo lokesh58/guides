@@ -197,6 +197,10 @@ arch-chroot /mnt
 
 Edit the pacman.conf to enable multilib:
 
+```bash
+nvim /etc/pacman.conf
+```
+
 ```conf
 ...
 [multilib]
@@ -368,6 +372,16 @@ fallback_uki="/efi/EFI/Linux/arch-linux-fallback.efi"
 fallback_options="-S autodetect"
 ```
 
+Update hooks in mkinitcpio.conf:
+
+```bash
+nvim /etc/mkinitcpio.conf
+```
+
+```conf
+HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
+```
+
 Generate the unified kernel image:
 
 ```bash
@@ -376,12 +390,6 @@ mkinitcpio -P
 ```
 
 #### Setup Boot Loader
-
-##### Option 1: Directly from UEFI
-
-TODO: Check configuration without boot loader.
-
-##### Option 2: systemd-boot
 
 Install systemd-boot:
 
@@ -453,19 +461,85 @@ systemd-cryptenroll /dev/nvme0n1p2 --wipe-slot=empty --tpm2-device=auto --tpm2-p
 
 Reboot and verify LUKS is auto unlocked.
 
+### (Optional)Install ZRAM
+
+Install zram:
+
+```bash
+pacman -S zram-generator
+```
+
+Setup configuration for zram:
+
+```bash
+nvim /etc/systemd/zram-generator.conf
+```
+
+```conf
+[zram0]
+```
+
+Disable zwap in kernel parameters:
+
+```bash
+nvim /etc/cmdline.d/zram.conf
+```
+
+```conf
+# disable zwap as it interferes with zram
+zswap.enabled=0
+```
+
+Rebuild the kernel image:
+
+```bash
+mkinitcpio -P
+```
+
+Reboot and verify zram is enabled:
+
+```bash
+zramctl
+```
+
+### (Recommended but optional) Create a snapshot of the root partition
+
+Create a readonly snapshot of the root partition.
+This helps you easily restore the system to the minimal installation state, in case something goes wrong. Wrong drivers are installed, or you are just trying out things.
+
+```bash
+btrfs subvolume snapshot -r / /.snapshots/@root-minimal
+```
+
 ## Graphics Driver Installation
 
 This part is very much dependent on the PC, follow official [wiki](https://wiki.archlinux.org/title/Xorg#Driver_installation) page.
 
-Here the installation is done for Integrated Intel GPU and Discrete NVIDIA GPU.
-
-Todo: need to verify this part and add steps for Nvidia Optimus.
+For Dell G15 with Intel i7 12th Gen (Iris Xe) and NVIDIA RTX 3050 Ti, install the following packages:
 
 ```bash
-pacman -S mesa mesa-utils lib32-mesa vulkan-intel lib32-vulkan-intel nvidia-open nvidia-utils lib32-nvidia-utils
+# Intel Graphics Drivers
+pacman -S mesa lib32-mesa intel-media-driver vulkan-intel lib32-vulkan-intel
+
+# NVIDIA Graphics Drivers
+pacman -S nvidia-open nvidia-utils lib32-nvidia-utils nvidia-prime
+
+# Optional but recommended for gaming
+pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
+
+pacman -S mesa-utils vulkan-tools
+```
+
+### NVIDIA Driver Configuration
+
+The NVIDIA driver now automatically triggers initramfs regeneration when updated. However, if you want to ensure the initramfs is always updated properly, especially if you have NVIDIA modules in your initramfs, you can optionally create a pacman hook:
+
+```bash
 mkdir -p /etc/pacman.d/hooks
 nvim /etc/pacman.d/hooks/nvidia.hook
 ```
+
+Add the following content (optional):
 
 ```conf
 [Trigger]
@@ -477,11 +551,69 @@ Target=nvidia-open
 Target=linux
 
 [Action]
-Description=Updating NVIDIA module in initcpio
+Description=Update NVIDIA module in initcpio
 Depends=mkinitcpio
 When=PostTransaction
 NeedsTargets
 Exec=/bin/sh -c 'while read -r trg; do case $trg in linux*) exit 0; esac; done; /usr/bin/mkinitcpio -P'
+```
+
+### NVIDIA Prime Configuration
+
+udev rules and module parameters can be references from [NVIDIA site](https://us.download.nvidia.com/XFree86/Linux-x86_64/550.67/README/dynamicpowermanagement.html).
+Also refer to arch wiki [page](https://wiki.archlinux.org/title/PRIME#NVIDIA) for more details.
+
+First setup udev rules:
+
+```bash
+nvim /etc/udev/rules.d/80-nvidia-pm.rules
+```
+
+```conf
+# Remove NVIDIA USB xHCI Host Controller devices, if present
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x0c0330", ATTR{remove}="1"
+
+# Remove NVIDIA USB Type-C UCSI devices, if present
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x0c8000", ATTR{remove}="1"
+
+# Remove NVIDIA Audio devices, if present
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x040300", ATTR{remove}="1"
+
+# Enable runtime PM for NVIDIA VGA/3D controller devices on adding device
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="auto"
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TEST=="power/control", ATTR{power/control}="auto"
+
+# Enable runtime PM for NVIDIA VGA/3D controller devices on driver bind
+ACTION=="bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="auto"
+ACTION=="bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TEST=="power/control", ATTR{power/control}="auto"
+
+# Disable runtime PM for NVIDIA VGA/3D controller devices on driver unbind
+ACTION=="unbind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="on"
+ACTION=="unbind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TEST=="power/control", ATTR{power/control}="on"
+```
+
+Next setup module parameters:
+
+```bash
+nvim /etc/modprobe.d/nvidia-pm.conf
+```
+
+```conf
+options nvidia "NVreg_DynamicPowerManagement=0x02"
+```
+
+Enable nvidia-persistenced.service:
+
+```bash
+systemctl enable nvidia-persistenced.service
+```
+
+### (Recommended but optional) Create a snapshot of the root partition
+
+At this point of time, all the drivers are installed, we can create a snapshot and experiment with different Desktop Environments without worrying about bloating the system.
+
+```bash
+btrfs subvolume snapshot -r / /.snapshots/@root-graphic-drivers
 ```
 
 ## Desktop Environment
