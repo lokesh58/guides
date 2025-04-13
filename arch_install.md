@@ -299,6 +299,14 @@ systemctl enable NetworkManager
 systemctl mask systemd-networkd
 ```
 
+#### Misc
+
+Enable bluetooth:
+
+```bash
+systemctl enable bluetooth.service
+```
+
 #### Add a non-root user
 
 Add a non-root user to wheel group, and enable sudo access for wheel group:
@@ -618,4 +626,51 @@ btrfs subvolume snapshot -r / /.snapshots/@root-graphic-drivers
 
 ## Desktop Environment
 
-TODO: need to decide which desktop environment to use.
+### Install Cosmic Desktop
+
+```bash
+pacman -S cosmic power-profiles-daemon
+```
+
+Enable cosmic greeter:
+
+```bash
+systemctl enable cosmic-greeter.service
+```
+
+## Security
+
+Install firewall, using nftables (iptables is pre-installed but nftables is newer and preferred by me):
+
+```bash
+# iptables-nft automatically removes iptables and installs nftables
+pacman -S iptables-nft
+```
+
+You can change firewall configuration in `/etc/nftables.conf` if you know what you are doing, otherwise just use the default one.
+
+Enable firewall:
+
+```bash
+systemctl enable --now nftables.service
+```
+
+## AUR Helper
+
+First install some dependencies:
+
+```bash
+sudo pacman -S --needed git base-devel
+sudo pacman -S rustup # needed to build paru
+rustup default stable
+```
+
+Install paru:
+
+```bash
+mkdir -p ~/.cache/AUR
+cd ~/.cache/AUR
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si
+```
