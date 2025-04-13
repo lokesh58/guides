@@ -684,8 +684,7 @@ systemctl enable --now nftables.service
 First install some dependencies:
 
 ```bash
-sudo pacman -S --needed git base-devel
-sudo pacman -S rustup # needed to build paru
+sudo pacman -S --needed git base-devel rustup
 rustup default stable
 ```
 
