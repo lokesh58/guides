@@ -469,7 +469,7 @@ systemd-cryptenroll /dev/nvme0n1p2 --wipe-slot=empty --tpm2-device=auto --tpm2-p
 
 Reboot and verify LUKS is auto unlocked.
 
-### (Optional)Install ZRAM
+### Install ZRAM
 
 Install zram:
 
@@ -510,7 +510,7 @@ Reboot and verify zram is enabled:
 zramctl
 ```
 
-### (Recommended but optional) Create a snapshot of the root partition
+### (Optional) Create a snapshot of the root partition
 
 Create a readonly snapshot of the root partition.
 This helps you easily restore the system to the minimal installation state, in case something goes wrong. Wrong drivers are installed, or you are just trying out things.
@@ -527,15 +527,15 @@ For Dell G15 with Intel i7 12th Gen (Iris Xe) and NVIDIA RTX 3050 Ti, install th
 
 ```bash
 # Intel Graphics Drivers
-pacman -S mesa lib32-mesa intel-media-driver vulkan-intel lib32-vulkan-intel
+sudo pacman -S mesa lib32-mesa intel-media-driver vulkan-intel lib32-vulkan-intel
 
 # NVIDIA Graphics Drivers
-pacman -S nvidia-open nvidia-utils lib32-nvidia-utils nvidia-prime
+sudo pacman -S nvidia-open nvidia-utils lib32-nvidia-utils nvidia-prime
 
 # Optional but recommended for gaming
-pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
+sudo pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
 
-pacman -S mesa-utils vulkan-tools
+sudo pacman -S mesa-utils vulkan-tools
 ```
 
 ### NVIDIA Driver Configuration
@@ -543,8 +543,8 @@ pacman -S mesa-utils vulkan-tools
 The NVIDIA driver now automatically triggers initramfs regeneration when updated. However, if you want to ensure the initramfs is always updated properly, especially if you have NVIDIA modules in your initramfs, you can optionally create a pacman hook:
 
 ```bash
-mkdir -p /etc/pacman.d/hooks
-nvim /etc/pacman.d/hooks/nvidia.hook
+sudo mkdir -p /etc/pacman.d/hooks
+sudo nvim /etc/pacman.d/hooks/nvidia.hook
 ```
 
 Add the following content (optional):
@@ -574,7 +574,7 @@ Also refer to arch wiki [page](https://wiki.archlinux.org/title/PRIME#NVIDIA) fo
 First setup udev rules:
 
 ```bash
-nvim /etc/udev/rules.d/80-nvidia-pm.rules
+sudo nvim /etc/udev/rules.d/80-nvidia-pm.rules
 ```
 
 ```conf
@@ -603,7 +603,7 @@ ACTION=="unbind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x0302
 Next setup module parameters:
 
 ```bash
-nvim /etc/modprobe.d/nvidia-pm.conf
+sudo nvim /etc/modprobe.d/nvidia-pm.conf
 ```
 
 ```conf
@@ -616,26 +616,50 @@ Enable nvidia-persistenced.service:
 systemctl enable nvidia-persistenced.service
 ```
 
-### (Recommended but optional) Create a snapshot of the root partition
+### (Optional) Create a snapshot of the root partition
 
 At this point of time, all the drivers are installed, we can create a snapshot and experiment with different Desktop Environments without worrying about bloating the system.
 
 ```bash
-btrfs subvolume snapshot -r / /.snapshots/@root-graphic-drivers
+sudo btrfs subvolume snapshot -r / /.snapshots/@root-graphic-drivers
 ```
 
 ## Desktop Environment
 
-### Install Cosmic Desktop
+### Install KDE Plasma
 
 ```bash
-pacman -S cosmic power-profiles-daemon xdg-user-dirs gnome-keyring libsecret seahorse
+sudo pacman -S plasma-meta kde-applications-meta
 ```
 
-Enable cosmic greeter:
+Enable sddm:
 
 ```bash
-systemctl enable cosmic-greeter.service
+systemctl enable sddm.service
+```
+
+Enable SDDM auto login
+
+```bash
+sudo mkdir /etc/sddm.conf.d
+sudo nvim /etc/sddm.conf.d/autologin.conf
+```
+
+```conf
+[Autologin]
+User=lokesh58
+Session=plasma
+```
+
+Setup auto lock on KDE login
+
+```bash
+nvim ~/.config/kscreenlockerrc
+```
+
+```conf
+[Daemon]
+LockOnStart=true
 ```
 
 ## Security
@@ -644,7 +668,7 @@ Install firewall, using nftables (iptables is pre-installed but nftables is newe
 
 ```bash
 # iptables-nft automatically removes iptables and installs nftables
-pacman -S iptables-nft
+sudo pacman -S iptables-nft
 ```
 
 You can change firewall configuration in `/etc/nftables.conf` if you know what you are doing, otherwise just use the default one.
