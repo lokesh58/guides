@@ -629,7 +629,7 @@ btrfs subvolume snapshot -r / /.snapshots/@root-graphic-drivers
 ### Install Cosmic Desktop
 
 ```bash
-pacman -S cosmic power-profiles-daemon
+pacman -S cosmic power-profiles-daemon xdg-user-dirs
 ```
 
 Enable cosmic greeter:
