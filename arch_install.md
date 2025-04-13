@@ -53,12 +53,12 @@ Explanation of mount options:
 - `umask=0077`: Set the umask to 0077 (default is 0022, which is too permissive for EFI partitions)
 
 ```bash
-mount -o noatime,compress=zstd,subvol=@ /dev/mapper/root /mnt
+mount -o noatime,compress=zstd,discard=async,subvol=@ /dev/mapper/root /mnt
 mkdir -p /mnt/home /mnt/var/log /mnt/var/cache/pacman/pkg /mnt/.snapshots /mnt/efi
-mount -o noatime,compress=zstd,subvol=@home /dev/mapper/root /mnt/home
-mount -o noatime,compress=zstd,subvol=@log /dev/mapper/root /mnt/var/log
-mount -o noatime,compress=zstd,subvol=@pkg /dev/mapper/root /mnt/var/cache/pacman/pkg
-mount -o noatime,compress=zstd,subvol=@.snapshots /dev/mapper/root /mnt/.snapshots
+mount -o noatime,compress=zstd,discard=async,subvol=@home /dev/mapper/root /mnt/home
+mount -o noatime,compress=zstd,discard=async,subvol=@log /dev/mapper/root /mnt/var/log
+mount -o noatime,compress=zstd,discard=async,subvol=@pkg /dev/mapper/root /mnt/var/cache/pacman/pkg
+mount -o noatime,compress=zstd,discard=async,subvol=@.snapshots /dev/mapper/root /mnt/.snapshots
 mount -o umask=0077 /dev/nvme0n1p1 /mnt/efi
 ```
 
