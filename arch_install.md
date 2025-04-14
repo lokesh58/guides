@@ -630,6 +630,7 @@ sudo btrfs subvolume snapshot -r / /.snapshots/@root-graphic-drivers
 
 ```bash
 sudo pacman -S plasma-meta kde-applications-meta
+sudo pacman -S system-config-printer # to allow configuration of printers from KDE settings
 ```
 
 Enable sddm:
@@ -646,7 +647,7 @@ Install firewall, using nftables (iptables is pre-installed but nftables is newe
 
 ```bash
 # iptables-nft automatically removes iptables and installs nftables
-sudo pacman -S iptables-nft
+sudo pacman -S iptables-nft firewalld
 ```
 
 You can change firewall configuration in `/etc/nftables.conf` if you know what you are doing, otherwise just use the default one.
@@ -654,7 +655,8 @@ You can change firewall configuration in `/etc/nftables.conf` if you know what y
 Enable firewall:
 
 ```bash
-systemctl enable --now nftables.service
+systemctl mask nftables.service # so that no conflicts happen between nftables and firewalld
+systemctl enable --now firewalld.service
 ```
 
 ## AUR Helper
