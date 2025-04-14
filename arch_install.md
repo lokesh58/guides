@@ -638,29 +638,7 @@ Enable sddm:
 systemctl enable sddm.service
 ```
 
-Enable SDDM auto login
-
-```bash
-sudo mkdir /etc/sddm.conf.d
-sudo nvim /etc/sddm.conf.d/autologin.conf
-```
-
-```conf
-[Autologin]
-User=lokesh58
-Session=plasma
-```
-
-Setup auto lock on KDE login
-
-```bash
-nvim ~/.config/kscreenlockerrc
-```
-
-```conf
-[Daemon]
-LockOnStart=true
-```
+Once you are in KDE, I highly recommend to change the SDDM theme to Breeze from KDE Settings app.
 
 ## Security
 
