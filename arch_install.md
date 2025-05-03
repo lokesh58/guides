@@ -697,3 +697,11 @@ To run a game with mangohud and gamemode in steam, edit the launch options:
 ```conf
 mangohud gamemoderun %command%
 ```
+
+## Apps Setup
+
+Install VSCode and Brave browser:
+
+```bash
+paru -S visual-studio-code-bin brave-bin
+```
