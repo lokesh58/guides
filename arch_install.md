@@ -705,3 +705,15 @@ Install VSCode and Brave browser:
 ```bash
 paru -S visual-studio-code-bin brave-bin
 ```
+
+## Neovim Setup
+
+Installing neovim and requirements for plugins:
+
+```bash
+paru -S kitty ttf-fira-mono # use kitty terminal for neovim
+paru -S neovim
+paru -S fzf fd ripgrep zoxide # for fzf-lua
+paru -S lazygit # for Snacks
+paru -S unzip # required for Mason
+```
