@@ -677,3 +677,23 @@ git clone https://aur.archlinux.org/paru.git
 cd paru
 makepkg -si
 ```
+
+## Gaming Setup
+
+Install steam, mangohud and gamemode:
+
+```bash
+paru -S steam mangohud lib32-mangohud gamemode lib32-gamemode
+```
+
+Add yourself to gamemode user group:
+
+```bash
+sudo usermod -aG gamemode lokesh58
+```
+
+To run a game with mangohud and gamemode in steam, edit the launch options:
+
+```conf
+mangohud gamemoderun %command%
+```
