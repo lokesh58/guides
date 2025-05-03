@@ -698,15 +698,16 @@ To run a game with mangohud and gamemode in steam, edit the launch options:
 mangohud gamemoderun %command%
 ```
 
-## Apps Setup
+## Coding Setup
 
+### Graphical Apps
 Install VSCode and Brave browser:
 
 ```bash
 paru -S visual-studio-code-bin brave-bin
 ```
 
-## Neovim Setup
+### Neovim Setup
 
 Installing neovim and requirements for plugins:
 
@@ -716,4 +717,13 @@ paru -S neovim
 paru -S fzf fd ripgrep zoxide # for fzf-lua
 paru -S lazygit # for Snacks
 paru -S unzip # required for Mason
+```
+
+### Node setup
+
+Install Node Version Manager and default to lts
+
+```bash
+paru -S nvm
+nvm install lts/*
 ```
