@@ -98,6 +98,7 @@ Below is a description of each package being installed:
 - `base`: Minimal package set for a basic Arch Linux installation
 - `linux`: The Linux kernel and modules
 - `linux-firmware`: Firmware files for Linux
+- `linux-headers`: Kernel Headers for Linux
 - `intel-ucode`: Microcode updates for Intel CPUs
 - `btrfs-progs`: BTRFS filesystem utilities
 
@@ -176,7 +177,7 @@ Below is a description of each package being installed:
 - `pipewire-ffado`: FireWire audio device support
 
 ```bash
-pacstrap -K /mnt base linux linux-firmware intel-ucode btrfs-progs sof-firmware alsa-utils pipewire lib32-pipewire wireplumber pipewire-alsa pipewire-pulse pipewire-jack lib32-pipewire-jack bluez bluez-utils pipewire-audio networkmanager neovim man-db man-pages texinfo sudo reflector apparmor sbctl
+pacstrap -K /mnt base linux linux-firmware linux-headers intel-ucode btrfs-progs sof-firmware alsa-utils pipewire lib32-pipewire wireplumber pipewire-alsa pipewire-pulse pipewire-jack lib32-pipewire-jack bluez bluez-utils pipewire-audio networkmanager neovim man-db man-pages texinfo sudo reflector apparmor sbctl
 ```
 
 Generate fstab so that the system can mount the partitions automatically at boot.
@@ -222,10 +223,10 @@ nvim /etc/xdg/reflector/reflector.conf
 --sort rate
 ```
 
-Enable reflector timer to automatically update the mirrorlist from time to time:
+Enable reflector service to automatically update the mirrorlist after boot (recommended for personal laptops, use the timer for servers):
 
 ```bash
-systemctl enable reflector.timer
+systemctl enable reflector
 ```
 
 Optionally, setup auto cleanup of pacman cache:
@@ -288,7 +289,7 @@ nvim /etc/hosts
 
 ```conf
 127.0.0.1       localhost
-127.0.0.1       localhost
+::1             localhost
 127.0.1.1       aoitrur
 ```
 
@@ -530,7 +531,7 @@ For Dell G15 with Intel i7 12th Gen (Iris Xe) and NVIDIA RTX 3050 Ti, install th
 sudo pacman -S mesa lib32-mesa intel-media-driver vulkan-intel lib32-vulkan-intel
 
 # NVIDIA Graphics Drivers
-sudo pacman -S nvidia-open nvidia-utils lib32-nvidia-utils nvidia-prime
+sudo pacman -S nvidia-dkms nvidia-utils lib32-nvidia-utils nvidia-prime
 
 # Optional but recommended for gaming
 sudo pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
@@ -701,6 +702,7 @@ mangohud gamemoderun %command%
 ## Coding Setup
 
 ### Graphical Apps
+
 Install VSCode and Brave browser:
 
 ```bash
