@@ -12,7 +12,7 @@ It is assumed that bootable Arch Linux media is created and system is booted fro
 
 This guide will use the following partitions:
 
-1. EFI (512 MiB) -> type = EFI
+1. EFI (1 GiB) -> type = EFI
 2. LUKS Root (Rest) -> type = Linux Root
 
 You can use your favorite tool to create these partitions. The guide doesn't cover that part, and official Arch Wiki has a good guide on that.
@@ -67,7 +67,7 @@ mount -o umask=0077 /dev/nvme0n1p1 /mnt/efi
 First update the pacman mirrorlist to use the fastest mirror.
 
 ```bash
-reflector --country India --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+reflector --country India,Germany,France --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 ```
 
 Before installing packages, enable the multilib repository which is needed for 32-bit packages:
@@ -98,7 +98,7 @@ Below is a description of each package being installed:
 - `base`: Minimal package set for a basic Arch Linux installation
 - `linux`: The Linux kernel and modules
 - `linux-firmware`: Firmware files for Linux
-- `linux-headers`: Kernel Headers for Linux
+- `linux-headers`: Kernel Headers for Linux, needed for DKMS packages
 - `intel-ucode`: Microcode updates for Intel CPUs
 - `btrfs-progs`: BTRFS filesystem utilities
 
@@ -136,6 +136,11 @@ Below is a description of each package being installed:
 - `pipewire-audio`: PipeWire Bluetooth audio support
 
 **Optional Packages (Can be installed later if needed):**
+
+**Local Hostname Resolution:**
+
+- `avahi`: Allows discovery of local devices on network
+- `nss-mdns`: Provides local hostname resolution to avahi
 
 **Audio Enhancements:**
 
@@ -298,6 +303,30 @@ Enable NetworkManager and mask systemd-networkd to prevent conflicts:
 ```bash
 systemctl enable NetworkManager
 systemctl mask systemd-networkd
+```
+
+##### (Optional) Enable Local Network Devices Discovery
+
+Install avahi and nss-mdns
+
+```bash
+pacman -S avahi nss-mdns
+```
+
+Enable Avahi Daemon
+
+```bash
+systemctl enable avahi-daemon
+```
+
+Configure Hostname Resolution by editing nsswitch conf file
+
+```bash
+nvim /etc/nsswitch.conf
+```
+
+```conf
+hosts: mymachines mdns_minimal [NOTFOUND=return] resolve [!UNAVAIL=return] files myhostname dns
 ```
 
 #### Misc
@@ -541,32 +570,6 @@ sudo pacman -S mesa-utils vulkan-tools
 
 ### NVIDIA Driver Configuration
 
-The NVIDIA driver now automatically triggers initramfs regeneration when updated. However, if you want to ensure the initramfs is always updated properly, especially if you have NVIDIA modules in your initramfs, you can optionally create a pacman hook:
-
-```bash
-sudo mkdir -p /etc/pacman.d/hooks
-sudo nvim /etc/pacman.d/hooks/nvidia.hook
-```
-
-Add the following content (optional):
-
-```conf
-[Trigger]
-Operation=Install
-Operation=Upgrade
-Operation=Remove
-Type=Package
-Target=nvidia-open
-Target=linux
-
-[Action]
-Description=Update NVIDIA module in initcpio
-Depends=mkinitcpio
-When=PostTransaction
-NeedsTargets
-Exec=/bin/sh -c 'while read -r trg; do case $trg in linux*) exit 0; esac; done; /usr/bin/mkinitcpio -P'
-```
-
 ### NVIDIA Prime Configuration
 
 udev rules and module parameters can be references from [NVIDIA site](https://us.download.nvidia.com/XFree86/Linux-x86_64/550.67/README/dynamicpowermanagement.html).
@@ -697,35 +700,4 @@ To run a game with mangohud and gamemode in steam, edit the launch options:
 
 ```conf
 mangohud gamemoderun %command%
-```
-
-## Coding Setup
-
-### Graphical Apps
-
-Install VSCode and Brave browser:
-
-```bash
-paru -S visual-studio-code-bin brave-bin
-```
-
-### Neovim Setup
-
-Installing neovim and requirements for plugins:
-
-```bash
-paru -S kitty ttf-fira-mono # use kitty terminal for neovim
-paru -S neovim
-paru -S fzf fd ripgrep zoxide # for fzf-lua
-paru -S lazygit # for Snacks
-paru -S unzip # required for Mason
-```
-
-### Node setup
-
-Install Node Version Manager and default to lts
-
-```bash
-paru -S nvm
-nvm install lts/*
 ```
