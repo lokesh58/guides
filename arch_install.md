@@ -637,7 +637,7 @@ sudo pacman -S plasma-meta kde-applications-meta
 sudo pacman -S system-config-printer # to allow configuration of printers from KDE settings
 ```
 
-Enable sddm:
+(Optional) Enable sddm:
 
 ```bash
 systemctl enable sddm.service
