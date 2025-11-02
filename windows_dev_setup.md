@@ -1,8 +1,11 @@
-1. enabled dev mode
+# Windows Setup
+
+1. enabled dev mode (allows creating symlink without admin permission)
 2. installed python install manager
-3. added path for pim ^ & another change was done to allow big paths, not sure about it
+3. added path for pim ^ & another change was done to allow big paths (change is in registry)
 
 scoop packages (corresponding winget packages):
+
 1. 7zip (7zip.7zip)
 2. ast-grep (ast-grep.ast-grep)
 3. cmake (Kitware.CMake)
@@ -21,6 +24,7 @@ scoop packages (corresponding winget packages):
 16. wget (xxx not needed)
 
 final winget packages:
+
 1. Git.Git
 2. Neovim.Neovim
 3. 7zip.7zip (required for mason)
@@ -34,3 +38,7 @@ final winget packages:
 11. ast-grep.ast-grep (used by find and replace plugin neovim)
 12. Kitware.CMake
 13. BrechtSanders.WinLibs.POSIX.UCRT.LLVM
+
+Additional cool packages:
+
+1. Microsoft.PowerToys (Gives the alt+space search bar like in mac)
