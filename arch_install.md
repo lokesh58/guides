@@ -560,7 +560,8 @@ For Dell G15 with Intel i7 12th Gen (Iris Xe) and NVIDIA RTX 3050 Ti, install th
 sudo pacman -S mesa lib32-mesa intel-media-driver vulkan-intel lib32-vulkan-intel
 
 # NVIDIA Graphics Drivers
-sudo pacman -S nvidia-dkms nvidia-utils lib32-nvidia-utils nvidia-prime
+# use nvidia-open-dkms if plan to use multiple kernels
+sudo pacman -S nvidia-open nvidia-utils lib32-nvidia-utils nvidia-prime
 
 # Optional but recommended for gaming
 sudo pacman -S vulkan-icd-loader lib32-vulkan-icd-loader
