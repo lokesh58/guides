@@ -39,6 +39,7 @@ btrfs subvolume create /mnt/@home
 btrfs subvolume create /mnt/@log
 btrfs subvolume create /mnt/@pkg
 btrfs subvolume create /mnt/@docker
+btrfs subvolume create /mnt/@containerd
 btrfs subvolume create /mnt/@.snapshots
 umount /mnt
 ```
@@ -55,11 +56,12 @@ Explanation of mount options:
 
 ```bash
 mount -o noatime,compress=zstd,discard=async,subvol=@ /dev/mapper/root /mnt
-mkdir -p /mnt/home /mnt/var/log /mnt/var/cache/pacman/pkg /mnt/var/lib/docker /mnt/.snapshots /mnt/efi
+mkdir -p /mnt/home /mnt/var/log /mnt/var/cache/pacman/pkg /mnt/var/lib/docker /mnt/var/lib/containerd /mnt/.snapshots /mnt/efi
 mount -o noatime,compress=zstd,discard=async,subvol=@home /dev/mapper/root /mnt/home
 mount -o noatime,compress=zstd,discard=async,subvol=@log /dev/mapper/root /mnt/var/log
 mount -o noatime,compress=zstd,discard=async,subvol=@pkg /dev/mapper/root /mnt/var/cache/pacman/pkg
 mount -o noatime,compress=zstd,discard=async,subvol=@docker /dev/mapper/root /mnt/var/lib/docker
+mount -o noatime,compress=zstd,discard=async,subvol=@containerd /dev/mapper/root /mnt/var/lib/containerd
 mount -o noatime,compress=zstd,discard=async,subvol=@.snapshots /dev/mapper/root /mnt/.snapshots
 mount -o umask=0077 /dev/nvme0n1p1 /mnt/efi
 ```
