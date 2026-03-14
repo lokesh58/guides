@@ -127,6 +127,7 @@ Below is a description of each package being installed:
 - `linux-firmware`: Firmware files for Linux
 - `linux-headers`: Kernel Headers for Linux, needed for DKMS packages
 - `intel-ucode`: Microcode updates for Intel CPUs
+- `e2fsprogs`: Ext4 filesystem utilities
 - `btrfs-progs`: BTRFS filesystem utilities
 
 **Audio:**
@@ -209,7 +210,7 @@ Below is a description of each package being installed:
 - `pipewire-ffado`: FireWire audio device support
 
 ```bash
-pacstrap -K /mnt base linux linux-firmware linux-headers intel-ucode btrfs-progs sof-firmware alsa-utils pipewire lib32-pipewire wireplumber pipewire-alsa pipewire-pulse pipewire-jack lib32-pipewire-jack bluez bluez-utils pipewire-audio networkmanager neovim man-db man-pages texinfo sudo reflector apparmor sbctl
+pacstrap -K /mnt base linux linux-firmware linux-headers intel-ucode sof-firmware alsa-utils pipewire lib32-pipewire wireplumber pipewire-alsa pipewire-pulse pipewire-jack lib32-pipewire-jack bluez bluez-utils pipewire-audio networkmanager neovim man-db man-pages texinfo sudo reflector apparmor sbctl e2fsprogs/btrfs-progs
 ```
 
 Generate fstab so that the system can mount the partitions automatically at boot.
