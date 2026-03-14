@@ -392,6 +392,8 @@ nvim /etc/cmdline.d/root.conf
 # To get UUID in nvim): =system("blkid -s UUID -o value /dev/nvme0n1p2")
 ```
 
+**Important:** Remove the rootflags if using ext4
+
 ```conf
 rd.luks.name=<UUID>=root root=/dev/mapper/root rootflags=subvol=/@ rw
 ```
