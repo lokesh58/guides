@@ -23,10 +23,19 @@ ZRAM will be enabled later in the guide, hence a swap partition is not created.
 mkfs.fat -F32 -n EFI /dev/nvme0n1p1
 cryptsetup luksFormat /dev/nvme0n1p2 # keep empty passphrase as it will be removed later
 cryptsetup open /dev/nvme0n1p2 root
-mkfs.btrfs -L LINUX_ROOT /dev/mapper/root
 ```
 
-### Create BTRFS Sub-volumes
+#### FS: ext4
+
+```bash
+mkfs.ext4 -L LINUX_ROOT /dev/mapper/root
+```
+
+#### FS: btrfs
+
+```bash
+mkfs.btrfs -L LINUX_ROOT /dev/mapper/root
+```
 
 We will create a flat sub-volume structure. Following the archinstall script recommended structure.
 
@@ -44,7 +53,21 @@ btrfs subvolume create /mnt/@.snapshots
 umount /mnt
 ```
 
-### Mount all the partitions and sub-volumes
+### Mount all the partitions
+
+#### FS: ext4
+
+Explanation of mount options:
+
+- `umask=0077`: Set the umask to 0077 (default is 0022, which is too permissive for EFI partitions)
+
+```bash
+mount /dev/mapper/root /mnt
+mkdir -p /mnt/efi
+mount -o umask=0077 /dev/nvme0n1p1 /mnt/efi
+```
+
+#### FS: btrfs
 
 All mount options with their defaults can be found in [wiki](https://man.archlinux.org/man/btrfs.5.en).
 Explanation of mount options:
@@ -71,7 +94,7 @@ mount -o umask=0077 /dev/nvme0n1p1 /mnt/efi
 First update the pacman mirrorlist to use the fastest mirror.
 
 ```bash
-reflector --country India,Germany,France --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+reflector --country India --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 ```
 
 Before installing packages, enable the multilib repository which is needed for 32-bit packages:
