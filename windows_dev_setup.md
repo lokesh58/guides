@@ -42,3 +42,21 @@ final winget packages:
 Additional cool packages:
 
 1. Microsoft.PowerToys (Gives the alt+space search bar like in mac)
+
+-------------------------------------------------------------------------------------------------------
+
+New packages installed for Zed based setup:
+
+1. Git.Git
+2. Neovim.Neovim
+3. Python.PythonInstallManager
+4. Schniz.fnm (setup the shell post install)
+5. sharkdp.fd
+6. BurntSushi.ripgrep.MSVC
+7. JesseDuffield.lazygit
+8. Kitware.CMake
+9. ZedIndustries.Zed
+10. DEVCOM.JetBrainsMonoNerdFont
+11. <VS Build Tools for Desktop C++ - exclude Cmake tools as we installed it separately>
+12. Ninja-build.Ninja
+13. Rustlang.Rustup
