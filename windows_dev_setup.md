@@ -59,4 +59,5 @@ New packages installed for Zed based setup:
 10. DEVCOM.JetBrainsMonoNerdFont
 11. <VS Build Tools for Desktop C++ - exclude Cmake tools as we installed it separately>
 12. Ninja-build.Ninja
-13. Rustlang.Rustup
+13. BrechtSanders.WinLibs.POSIX.UCRT.LLVM
+14. Rustlang.Rustup
