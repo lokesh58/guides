@@ -15,7 +15,7 @@ This guide will use the following partitions:
 1. EFI (1 GiB) -> type = EFI
 2. LUKS Root (Rest) -> type = Linux Root
 
-You can use your favorite tool to create these partitions. The guide doesn't cover that part, and official Arch Wiki has a good guide on that.
+You can use your favorite tool (gdisk is my preferred) to create these partitions. The guide doesn't cover that part, and official Arch Wiki has a good guide on that.
 **Note:** This guide assumes that the disk is `/dev/nvme0n1` and partitions are `nvme0n1p1` and `nvme0n1p2`.
 ZRAM will be enabled later in the guide, hence a swap partition is not created.
 
@@ -214,6 +214,7 @@ pacstrap -K /mnt base linux linux-firmware linux-headers intel-ucode sof-firmwar
 ```
 
 Generate fstab so that the system can mount the partitions automatically at boot.
+**Note:** This step is not required for ext4, as systemd autofs handles parition loading automatically.
 
 ```bash
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -311,7 +312,7 @@ echo "KEYMAP=us" >> /etc/vconsole.conf
 Set your hostname:
 
 ```bash
-echo "aoitrur" >> /etc/hostname
+echo "scar16" >> /etc/hostname
 ```
 
 Edit the hosts file:
@@ -323,7 +324,7 @@ nvim /etc/hosts
 ```conf
 127.0.0.1       localhost
 ::1             localhost
-127.0.1.1       aoitrur
+127.0.1.1       scar16
 ```
 
 Enable NetworkManager and mask systemd-networkd to prevent conflicts:
@@ -583,7 +584,7 @@ btrfs subvolume snapshot -r / /.snapshots/@root-minimal
 
 This part is very much dependent on the PC, follow official [wiki](https://wiki.archlinux.org/title/Xorg#Driver_installation) page.
 
-For Dell G15 with Intel i7 12th Gen (Iris Xe) and NVIDIA RTX 3050 Ti, install the following packages:
+For Asus ROG Scar 16 with Intel Core Ultra 9 275HX and NVIDIA RTX 5080, install the following packages:
 
 ```bash
 # Intel Graphics Drivers
@@ -620,15 +621,11 @@ ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x0c0330"
 ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x0c8000", ATTR{remove}="1"
 
 # Remove NVIDIA Audio devices, if present
-ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x040300", ATTR{remove}="1"
-
-# Enable runtime PM for NVIDIA VGA/3D controller devices on adding device
-ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="auto"
-ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TEST=="power/control", ATTR{power/control}="auto"
+# ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x040300", ATTR{remove}="1"
 
 # Enable runtime PM for NVIDIA VGA/3D controller devices on driver bind
-ACTION=="bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="auto"
-ACTION=="bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TEST=="power/control", ATTR{power/control}="auto"
+ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="auto"
+ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TEST=="power/control", ATTR{power/control}="auto"
 
 # Disable runtime PM for NVIDIA VGA/3D controller devices on driver unbind
 ACTION=="unbind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TEST=="power/control", ATTR{power/control}="on"
@@ -642,13 +639,18 @@ sudo nvim /etc/modprobe.d/nvidia-pm.conf
 ```
 
 ```conf
-options nvidia "NVreg_DynamicPowerManagement=0x02"
+options nvidia_drm modeset=1 fbdev=1
+options nvidia NVreg_EnableS0ixPowerManagement=1 NVreg_DynamicPowerManagement=0x02 NVreg_PreserveVideoMemoryAllocations=1 NVreg_TemporaryFilePath=/var/tmp
 ```
 
-Enable nvidia-persistenced.service:
+Enable relevant nvidia systemctl services:
 
 ```bash
-systemctl enable nvidia-persistenced.service
+systemctl enable nvidia-suspend.service
+systemctl enable nvidia-hibernate.service
+systemctl enable nvidia-resume.service
+systemctl enable nvidia-powerd.service
+systemctl enable nvidia-suspend-then-hibernate.service
 ```
 
 ### (Optional) Create a snapshot of the root partition
@@ -668,17 +670,18 @@ sudo pacman -S plasma-meta kde-applications-meta
 sudo pacman -S system-config-printer # to allow configuration of printers from KDE settings
 ```
 
-(Optional) Enable sddm:
+(Optional) Enable plasma login manager:
 
 ```bash
-systemctl enable sddm.service
+systemctl enable plasmalogin.service
 ```
-
-Once you are in KDE, I highly recommend to change the SDDM theme to Breeze from KDE Settings app.
 
 ## Security
 
 Install firewall, using nftables (iptables is pre-installed but nftables is newer and preferred by me):
+**Note:**
+At some point nftables became default and iptables package now refers to nftables itself.
+The below is still safe to run and is a no-op.
 
 ```bash
 # iptables-nft automatically removes iptables and installs nftables
@@ -731,4 +734,42 @@ To run a game with mangohud and gamemode in steam, edit the launch options:
 
 ```conf
 mangohud gamemoderun %command%
+```
+
+## Asus ROG Scar 16 Specific Setup
+
+OGC repo needs to be added first (Asus-Linux renamed to OGC).
+
+Add repo to `/etc/pacman.conf`
+
+```conf
+[ogc]
+# Main server
+Server = https://pacman.opengamingcollective.org
+# Germany
+Server = https://arch.asus-linux.org
+# Republic of Korea
+Server = https://naru.jhyub.dev/$repo
+```
+
+Install the key for ogc repo:
+
+```bash
+# Check the latest key ID from https://github.com/OpenGamingCollective/ogc-arch-packaging
+sudo pacman-key --recv-keys F79100EF8C802DAB81C323BB8EEA5962FE510E19
+sudo pacman-key --lsign-key F79100EF8C802DAB81C323BB8EEA5962FE510E19
+```
+
+Then install these packages.
+
+```bash
+sudo pacman -S asusctl rog-control-center
+```
+
+## Changing shell to zsh
+
+```bash
+sudo pacman -S zsh
+grep zsh /etc/shells # Verify zsh got installed, and path is present here
+chsh -s /usr/bin/zsh
 ```
