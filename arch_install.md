@@ -738,29 +738,7 @@ mangohud gamemoderun %command%
 
 ## Asus ROG Scar 16 Specific Setup
 
-OGC repo needs to be added first (Asus-Linux renamed to OGC).
-
-Add repo to `/etc/pacman.conf`
-
-```conf
-[ogc]
-# Main server
-Server = https://pacman.opengamingcollective.org
-# Germany
-Server = https://arch.asus-linux.org
-# Republic of Korea
-Server = https://naru.jhyub.dev/$repo
-```
-
-Install the key for ogc repo:
-
-```bash
-# Check the latest key ID from https://github.com/OpenGamingCollective/ogc-arch-packaging
-sudo pacman-key --recv-keys F79100EF8C802DAB81C323BB8EEA5962FE510E19
-sudo pacman-key --lsign-key F79100EF8C802DAB81C323BB8EEA5962FE510E19
-```
-
-Then install these packages.
+Install these packages.
 
 ```bash
 sudo pacman -S asusctl rog-control-center
