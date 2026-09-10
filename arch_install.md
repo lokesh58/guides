@@ -738,11 +738,27 @@ mangohud gamemoderun %command%
 
 ## Asus ROG Scar 16 Specific Setup
 
+### Power / armoury crate management
+
 Install these packages.
 
 ```bash
 sudo pacman -S asusctl rog-control-center
 ```
+
+### Touchpad Numberpad driver
+
+This is manual install as AUR package is broken right now. Make sure to update manually from time to time.
+
+```bash
+cd ~/.cache
+git clone https://github.com/asus-linux-drivers/asus-numberpad-driver
+cd asus-numberpad-driver
+git checkout v7.2.3 # use latest stable version
+bash ./install.sh # use layout = g635
+```
+
+Need to reload udev rules or a reboot for this to take effect.
 
 ## Changing shell to zsh
 
