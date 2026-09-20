@@ -303,7 +303,7 @@ locale-gen
 Set your locale and keymap:
 
 ```bash
-echo "LANG=en_IN" >> /etc/locale.conf
+echo "LANG=en_IN.UTF-8" >> /etc/locale.conf
 echo "KEYMAP=us" >> /etc/vconsole.conf
 ```
 
